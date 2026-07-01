@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Medicine Box - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen antialiased">
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">💊</span>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+                        Smart Medicine Box
+                    </h1>
+                </div>
+                <p class="text-slate-500 text-sm mt-1">Real-time Patient Adherence Dashboard</p>
+            </div>
+            <div id="connection-status" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Firebase Connected
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Pills Taken</h3>
+                <div class="flex items-baseline justify-between mt-4">
+                    <p id="total-taken" class="text-4xl font-extrabold tracking-tight text-emerald-600">0</p>
+                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Success</span>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Pills Missed</h3>
+                <div class="flex items-baseline justify-between mt-4">
+                    <p id="total-missed" class="text-4xl font-extrabold tracking-tight text-rose-600">0</p>
+                    <span class="text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">Alert</span>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Adherence Rate</h3>
+                <div class="flex items-baseline justify-between mt-4">
+                    <p id="adherence-rate" class="text-4xl font-extrabold tracking-tight text-indigo-600">0%</p>
+                    <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Performance</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-2">
+                <h3 class="text-md font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <span>📅</span> Daily Session Breakdown <span class="text-xs font-normal text-slate-400">(Taken vs Missed)</span>
+                </h3>
+                <div class="relative h-72">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h3 class="text-md font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <span>📊</span> Session-wise Missed Alerts
+                </h3>
+                <div class="relative h-72 flex justify-center">
+                    <canvas id="sessionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+                <h3 class="text-md font-bold text-slate-800">📋 Recent Medicine Logs</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-4 pl-6">Date</th>
+                            <th class="p-4">Session</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 pr-6">Pills Left</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body" class="divide-y divide-slate-100 text-sm text-slate-600">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === FIREBASE CONFIGURATION ===
+        const firebaseConfig = {
+            databaseURL: "https://medicine-box-c12c5-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let dailyChart, sessionChart;
+
+        // Fetch Data from Firebase
+        database.ref('logs').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            processData(data);
+        });
+
+        function processData(logsData) {
+            let totalTaken = 0;
+            let totalMissed = 0;
+            
+            let dailyLabels = [];
+            let dailyTakenData = [];
+            let dailyMissedData = [];
+
+            let sessionMissedCount = { "Morning": 0, "Afternoon": 0, "Evening": 0, "Night": 0 };
+            
+            const tableBody = document.getElementById('log-table-body');
+            tableBody.innerHTML = ''; 
+
+            const dates = Object.keys(logsData).sort().reverse();
+            const chartDates = [...dates].reverse().slice(-7);
+
+            // Process Data Loops
+            dates.forEach(date => {
+                const sessions = logsData[date];
+                for (const session in sessions) {
+                    const log = sessions[session];
+                    const status = log.status;
+                    const pillsLeft = log.pills_left;
+
+                    if (status === "Taken") totalTaken++;
+                    if (status === "Missed") {
+                        totalMissed++;
+                        if(sessionMissedCount[session] !== undefined) sessionMissedCount[session]++;
+                    }
+
+                    // Status Badge Styling (Light Theme optimized)
+                    const statusClass = status === "Taken" 
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-200" 
+                        : "text-rose-700 bg-rose-50 border-rose-200";
+
+                    const row = `
+                        <tr class="hover:bg-slate-50/80 transition-colors duration-150">
+                            <td class="p-4 pl-6 font-semibold text-slate-700">${date}</td>
+                            <td class="p-4"><span class="text-indigo-600 font-semibold">${session}</span></td>
+                            <td class="p-4"><span class="px-2.5 py-1 rounded-md border text-xs font-bold ${statusClass}">${status}</span></td>
+                            <td class="p-4 pr-6 text-slate-500 font-mono">${pillsLeft} pcs</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                }
+            });
+
+            // Process Daily Chart Data
+            chartDates.forEach(date => {
+                dailyLabels.push(date);
+                let tCount = 0;
+                let mCount = 0;
+                for (const session in logsData[date]) {
+                    if (logsData[date][session].status === "Taken") tCount++;
+                    if (logsData[date][session].status === "Missed") mCount++;
+                }
+                dailyTakenData.push(tCount);
+                dailyMissedData.push(mCount);
+            });
+
+            // Update Counter Text
+            document.getElementById('total-taken').innerText = totalTaken;
+            document.getElementById('total-missed').innerText = totalMissed;
+            const rate = totalTaken + totalMissed > 0 ? Math.round((totalTaken / (totalTaken + totalMissed)) * 100) : 0;
+            document.getElementById('adherence-rate').innerText = rate + "%";
+
+            // Render Stacked Bar Chart (Light Theme Grid Colors)
+            if (dailyChart) dailyChart.destroy();
+            const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+            dailyChart = new Chart(ctxDaily, {
+                type: 'bar',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [
+                        { label: 'Taken', data: dailyTakenData, backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Missed', data: dailyMissedData, backgroundColor: '#f43f5e', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false }, ticks: { color: '#64748b', font: { weight: '500' } } },
+                        y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0, color: '#64748b' } }
+                    },
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { color: '#334155', boxWidth: 12, usePointStyle: true, font: { weight: '500' } } } 
+                    }
+                }
+            });
+
+            // Render Doughnut Chart
+            if (sessionChart) sessionChart.destroy();
+            const ctxSession = document.getElementById('sessionChart').getContext('2d');
+            sessionChart = new Chart(ctxSession, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(sessionMissedCount),
+                    datasets: [{
+                        data: Object.values(sessionMissedCount),
+                        backgroundColor: ['#f59e0b', '#f97316', '#8b5cf6', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#334155', boxWidth: 12, usePointStyle: true, font: { weight: '500' } } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
