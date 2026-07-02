@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Medicine Box Live Dashboard</title>
+    <title>Smart Medicine Box Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -16,110 +16,85 @@
 <body class="bg-[#f8fafc] text-slate-800 min-h-screen antialiased">
 
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <!-- HEADER -->
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
+        
+        <header class="mb-8 flex justify-between items-center border-b border-slate-200 pb-6">
             <div>
                 <div class="flex items-center gap-2">
                     <span class="text-2xl">🏥</span>
-                    <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Smart Medicine Box Dashboard</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+                        Smart Medicine Box Dashboard
+                    </h1>
                 </div>
-                <p class="text-slate-500 text-sm mt-1">Real-time Multi-Patient Tracker</p>
+                <p class="text-slate-500 text-sm mt-1">Real-time Adherence & Environment Monitor</p>
             </div>
-            
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-                <div class="w-full sm:w-64">
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Patient / Box ID</label>
-                    <select id="device-select" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="box_01">Box 01: Patient 1 (Mahfuza)</option>
-                        <option value="box_02">Box 02: Patient 2</option>
-                    </select>
-                </div>
-                <div class="mt-5 sm:mt-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>Live Connected
-                </div>
+            <div class="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Syncing
             </div>
         </header>
 
-        <!-- LIVE CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-            <!-- Pills Left Card -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-5">
+                <div class="w-20 h-20 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-4xl text-white shadow-inner">👵</div>
+                <div>
+                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded uppercase">Patient Profile</span>
+                    <h4 class="text-xl font-bold text-slate-800 mt-1">Mahfuza Akter</h4>
+                    <p class="text-sm text-slate-500">Age: 65 | Blood Group: O+</p>
+                    <p class="text-xs text-rose-500 font-semibold mt-2 bg-rose-50 px-2 py-1 rounded border border-rose-100 inline-block">🚨 Emergency: +880 1711-223344</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-2">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1"><span>¼</span> Today's Prescription Guide</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5"><span class="text-slate-500">☀️ Morning (09:00 AM):</span> <span class="font-semibold text-slate-700">Napa Extend (After Food)</span></div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5"><span class="text-slate-500">🌤️ Afternoon (02:00 PM):</span> <span class="font-semibold text-slate-700">Eco-325 (Before Food)</span></div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5"><span class="text-slate-500">🌆 Evening (06:00 PM):</span> <span class="font-semibold text-slate-700">Calcium-D (After Food)</span></div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5"><span class="text-slate-500">🌙 Night (10:00 PM):</span> <span class="font-semibold text-slate-700">Secrin 1mg (Before Food)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl text-white shadow-md flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Pills Left</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="live-pills-left" class="text-3xl font-extrabold tracking-tight text-amber-400">--</p>
-                    <span class="text-[10px] font-bold text-slate-900 bg-amber-400 px-2 py-0.5 rounded">Stock</span>
-                </div>
+                <p id="live-pills-left" class="text-3xl font-extrabold tracking-tight text-amber-400 mt-3">--</p>
             </div>
-            <!-- Total Taken Card -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Taken</h3>
-                <div class="flex items-baseline justify-between mt-3"><p id="total-taken" class="text-3xl font-extrabold text-emerald-600">0</p></div>
+                <p id="total-taken" class="text-3xl font-extrabold tracking-tight text-emerald-600 mt-3">0</p>
             </div>
-            <!-- Total Missed Card -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Missed</h3>
-                <div class="flex items-baseline justify-between mt-3"><p id="total-missed" class="text-3xl font-extrabold text-rose-600">0</p></div>
+                <p id="total-missed" class="text-3xl font-extrabold tracking-tight text-rose-600 mt-3">0</p>
             </div>
-            <!-- Adherence Card -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Adherence Rate</h3>
-                <div class="flex items-baseline justify-between mt-3"><p id="adherence-rate" class="text-3xl font-extrabold text-indigo-600">0%</p></div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Adherence</h3>
+                <p id="adherence-rate" class="text-3xl font-extrabold tracking-tight text-indigo-600 mt-3">0%</p>
             </div>
-            <!-- Box Temperature Card -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Temp</h3>
-                <div class="flex items-baseline justify-between mt-3"><p id="live-temp" class="text-3xl font-extrabold text-orange-500">--°C</p></div>
-            </div>
-            <!-- Box Humidity Card -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Humid</h3>
-                <div class="flex items-baseline justify-between mt-3"><p id="live-humidity" class="text-3xl font-extrabold text-cyan-600">--%</p></div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Environment</h3>
+                <p id="live-env" class="text-2xl font-bold text-slate-700 mt-3">--°C | --%</p>
             </div>
         </div>
 
-        <!-- DYNAMIC ALARM SCHEDULES -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
-            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">⏰ Live Alarm Schedule Times</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
-                    <p class="text-xs font-bold text-slate-400 uppercase">☀️ Morning</p>
-                    <p id="schedule-morning" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
-                </div>
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
-                    <p class="text-xs font-bold text-slate-400 uppercase">🌤️ Afternoon</p>
-                    <p id="schedule-afternoon" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
-                </div>
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
-                    <p class="text-xs font-bold text-slate-400 uppercase">🌆 Evening</p>
-                    <p id="schedule-evening" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
-                </div>
-                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
-                    <p class="text-xs font-bold text-slate-400 uppercase">🌙 Night</p>
-                    <p id="schedule-night" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- CHARTS -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-                <h3 class="text-md font-bold text-slate-800 mb-6">📅 Daily Session Breakdown (Last 7 Days)</h3>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-2">
+                <h3 class="text-md font-bold text-slate-800 mb-6">📅 Daily Adherence (Last 7 Days)</h3>
                 <div class="relative h-64"><canvas id="dailyChart"></canvas></div>
             </div>
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 class="text-md font-bold text-slate-800 mb-6">📊 Session-wise Missed Alerts</h3>
-                <div class="relative h-64 flex justify-center"><canvas id="sessionChart"></canvas></div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h3 class="text-md font-bold text-slate-800 mb-6">📊 Missed Sessions Breakdown</h3>
+                <div class="relative h-64"><canvas id="sessionChart"></canvas></div>
             </div>
         </div>
 
-        <!-- RECENT LOGS TABLE -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50"><h3 class="text-md font-bold text-slate-800">📋 Recent Medicine Logs</h3></div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50"><h3 class="text-md font-bold text-slate-800">📋 History Logs</h3></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                            <th class="p-4 pl-6">Date</th><th class="p-4">Session</th><th class="p-4">Status</th><th class="p-4">IR Drop Verified</th><th class="p-4">Temp @ Alarm</th><th class="p-4 pr-6">Pills Left</th>
+                            <th class="p-4 pl-6">Date</th><th class="p-4">Session</th><th class="p-4">Status</th><th class="p-4">IR Drop</th><th class="p-4">Temp</th><th class="p-4 pr-6">Pills Left</th>
                         </tr>
                     </thead>
                     <tbody id="log-table-body" class="divide-y divide-slate-100 text-sm text-slate-600"></tbody>
@@ -134,111 +109,69 @@
         const database = firebase.database();
 
         let dailyChart, sessionChart;
-        let logRef = null, statusRef = null;
 
-        function initDashboardSync(boxId) {
-            if (logRef) logRef.off();
-            if (statusRef) statusRef.off();
+        database.ref('logs').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
 
-            // ১. লাইভ স্ট্যাটাস এবং অ্যালার্মের সময় সিঙ্ক
-            statusRef = database.ref('status/' + boxId);
-            statusRef.on('value', (snapshot) => {
-                const sData = snapshot.val();
-                if(sData) {
-                    document.getElementById('live-pills-left').innerText = sData.pills_left !== undefined ? sData.pills_left : '--';
-                    document.getElementById('live-temp').innerText = sData.temperature ? sData.temperature.toFixed(1) + '°C' : '--°C';
-                    document.getElementById('live-humidity').innerText = sData.humidity ? sData.humidity.toFixed(0) + '%' : '--%';
-                    
-                    if(sData.schedules) {
-                        document.getElementById('schedule-morning').innerText = sData.schedules.morning || '--:--';
-                        document.getElementById('schedule-afternoon').innerText = sData.schedules.afternoon || '--:--';
-                        document.getElementById('schedule-evening').innerText = sData.schedules.evening || '--:--';
-                        document.getElementById('schedule-night').innerText = sData.schedules.night || '--:--';
-                    }
-                }
-            });
+            let totalTaken = 0, totalMissed = 0, livePills = "--", lastTemp = "--", lastHum = "--";
+            let dailyLabels = [], dailyTaken = [], dailyMissed = [];
+            let sessionMissed = { "Morning": 0, "Afternoon": 0, "Evening": 0, "Night": 0 };
 
-            // ২. হিস্টোরি এবং টেবিল লগ সিঙ্ক
-            logRef = database.ref('logs/' + boxId);
-            logRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) { clearLogUI(); return; }
-                updateLogUI(data);
-            });
-        }
-
-        function clearLogUI() {
-            document.getElementById('total-taken').innerText = '0';
-            document.getElementById('total-missed').innerText = '0';
-            document.getElementById('adherence-rate').innerText = '0%';
-            document.getElementById('log-table-body').innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No logs generated yet.</td></tr>`;
-            if (dailyChart) dailyChart.destroy();
-            if (sessionChart) sessionChart.destroy();
-        }
-
-        function updateLogUI(logsData) {
-            let totalTaken = 0, totalMissed = 0;
-            let dailyLabels = [], dailyTakenData = [], dailyMissedData = [];
-            let sessionMissedCount = { "Morning": 0, "Afternoon": 0, "Evening": 0, "Night": 0 };
-            
             const tableBody = document.getElementById('log-table-body');
-            tableBody.innerHTML = ''; 
+            tableBody.innerHTML = '';
 
-            const dates = Object.keys(logsData).sort().reverse();
+            const dates = Object.keys(data).sort().reverse();
             const chartDates = [...dates].reverse().slice(-7);
 
-            dates.forEach((date) => {
-                const sessions = logsData[date];
-                for (const session in sessions) {
-                    const log = sessions[session];
-                    if (log.status === "Taken") totalTaken++;
-                    if (log.status === "Missed") { totalMissed++; sessionMissedCount[session]++; }
+            dates.forEach((date, index) => {
+                for (const session in data[date]) {
+                    const log = data[date][session];
+                    if(index === 0 && livePills === "--") livePills = log.pills_left;
+                    if(log.temp_at_time) { lastTemp = log.temp_at_time.toFixed(1); lastHum = log.humidity_at_time.toFixed(0); }
 
-                    const statusClass = log.status === "Taken" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-rose-700 bg-rose-50 border-rose-200";
-                    const irBadge = log.ir_detected ? `<span class="text-emerald-600 font-medium">🟢 Drop Verified</span>` : `<span class="text-slate-400">⚪ No Drop</span>`;
+                    if (log.status === "Taken") totalTaken++;
+                    else { totalMissed++; sessionMissed[session]++; }
 
                     tableBody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80">
+                        <tr class="hover:bg-slate-50">
                             <td class="p-4 pl-6 font-semibold">${date}</td>
                             <td class="p-4 text-indigo-600 font-semibold">${session}</td>
-                            <td class="p-4"><span class="px-2.5 py-1 rounded-md border text-xs font-bold ${statusClass}">${log.status}</span></td>
-                            <td class="p-4">${irBadge}</td>
-                            <td class="p-4 font-medium">${log.temp_at_time ? log.temp_at_time.toFixed(1) + '°C' : 'N/A'}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded border text-xs font-bold ${log.status === 'Taken' ? 'text-emerald-700 bg-emerald-50 border-emerald-200':'text-rose-700 bg-rose-50 border-rose-200'}">${log.status}</span></td>
+                            <td class="p-4">${log.ir_detected ? '🟢 Verified':'⚪ No Drop'}</td>
+                            <td class="p-4">${log.temp_at_time ? log.temp_at_time.toFixed(1)+'°C':'N/A'}</td>
                             <td class="p-4 pr-6 font-mono">${log.pills_left} pcs</td>
                         </tr>`;
                 }
             });
 
+            document.getElementById('live-pills-left').innerText = livePills;
             document.getElementById('total-taken').innerText = totalTaken;
             document.getElementById('total-missed').innerText = totalMissed;
-            document.getElementById('adherence-rate').innerText = (totalTaken + totalMissed > 0 ? Math.round((totalTaken / (totalTaken + totalMissed)) * 100) : 0) + "%";
+            document.getElementById('adherence-rate').innerText = (totalTaken+totalMissed > 0 ? Math.round((totalTaken/(totalTaken+totalMissed))*100):0) + "%";
+            document.getElementById('live-env').innerText = `${lastTemp}°C | ${lastHum}%`;
 
-            // Chart Generating Logic
-            chartDates.forEach(date => {
-                dailyLabels.push(date);
-                let t = 0, m = 0;
-                for (const s in logsData[date]) {
-                    if (logsData[date][s].status === "Taken") t++;
-                    if (logsData[date][s].status === "Missed") m++;
-                }
-                dailyTakenData.push(t); dailyMissedData.push(m);
+            // Charts Rendering
+            chartDates.forEach(d => {
+                dailyLabels.push(d); let t = 0, m = 0;
+                for(const s in data[d]) { if(data[d][s].status === "Taken") t++; else m++; }
+                dailyTaken.push(t); dailyMissed.push(m);
             });
 
             if (dailyChart) dailyChart.destroy();
-            dailyChart = new Chart(document.getElementById('dailyChart'), {
-                type: 'bar', data: { labels: dailyLabels, datasets: [{ label: 'Taken', data: dailyTakenData, backgroundColor: '#10b981' }, { label: 'Missed', data: dailyMissedData, backgroundColor: '#f43f5e' }] },
+            dailyChart = new Chart(document.getElementById('dailyChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: dailyLabels, datasets: [{ label: 'Taken', data: dailyTaken, backgroundColor: '#10b981' }, { label: 'Missed', data: dailyMissed, backgroundColor: '#f43f5e' }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, precision: 0 } } }
             });
 
             if (sessionChart) sessionChart.destroy();
-            sessionChart = new Chart(document.getElementById('sessionChart'), {
-                type: 'doughnut', data: { labels: Object.keys(sessionMissedCount), datasets: [{ data: Object.values(sessionMissedCount), backgroundColor: ['#f59e0b', '#f97316', '#8b5cf6', '#3b82f6'] }] },
+            sessionChart = new Chart(document.getElementById('sessionChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(sessionMissed), datasets: [{ data: Object.values(sessionMissed), backgroundColor: ['#f59e0b', '#f97316', '#8b5cf6', '#3b82f6'] }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '75%' }
             });
-        }
-
-        document.getElementById('device-select').addEventListener('change', (e) => initDashboardSync(e.target.value));
-        initDashboardSync(document.getElementById('device-select').value);
+        });
     </script>
 </body>
 </html>
