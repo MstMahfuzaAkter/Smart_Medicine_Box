@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-User Smart Medicine Box Dashboard</title>
+    <title>Smart Medicine Box Live Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -17,16 +16,14 @@
 <body class="bg-[#f8fafc] text-slate-800 min-h-screen antialiased">
 
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-        
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
+        <!-- HEADER -->
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
             <div>
                 <div class="flex items-center gap-2">
                     <span class="text-2xl">🏥</span>
-                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
-                        Smart Medicine Box Central
-                    </h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Smart Medicine Box Dashboard</h1>
                 </div>
-                <p class="text-slate-500 text-sm mt-1">Multi-Patient Real-time Adherence & Environment Monitor</p>
+                <p class="text-slate-500 text-sm mt-1">Real-time Multi-Patient Tracker</p>
             </div>
             
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
@@ -34,288 +31,213 @@
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Patient / Box ID</label>
                     <select id="device-select" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="box_01">Box 01: Patient 1 (Mahfuza)</option>
-                        <option value="box_02">Box 02: Patient 2 (X)</option>
-                        <option value="box_03">Box 03: Patient 3 (Y)</option>
+                        <option value="box_02">Box 02: Patient 2</option>
                     </select>
                 </div>
-                <div id="connection-status" class="mt-5 sm:mt-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Live Syncing
+                <div class="mt-5 sm:mt-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>Live Connected
                 </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <!-- LIVE CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <!-- Pills Left Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl text-white shadow-md flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Pills Left</h3>
+                <div class="flex items-baseline justify-between mt-3">
+                    <p id="live-pills-left" class="text-3xl font-extrabold tracking-tight text-amber-400">--</p>
+                    <span class="text-[10px] font-bold text-slate-900 bg-amber-400 px-2 py-0.5 rounded">Stock</span>
+                </div>
+            </div>
+            <!-- Total Taken Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Taken</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="total-taken" class="text-3xl font-extrabold tracking-tight text-emerald-600">0</p>
-                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Success</span>
-                </div>
+                <div class="flex items-baseline justify-between mt-3"><p id="total-taken" class="text-3xl font-extrabold text-emerald-600">0</p></div>
             </div>
-            
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <!-- Total Missed Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Missed</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="total-missed" class="text-3xl font-extrabold tracking-tight text-rose-600">0</p>
-                    <span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">Alert</span>
-                </div>
+                <div class="flex items-baseline justify-between mt-3"><p id="total-missed" class="text-3xl font-extrabold text-rose-600">0</p></div>
             </div>
-            
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <!-- Adherence Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Adherence Rate</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="adherence-rate" class="text-3xl font-extrabold tracking-tight text-indigo-600">0%</p>
-                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Ratio</span>
-                </div>
+                <div class="flex items-baseline justify-between mt-3"><p id="adherence-rate" class="text-3xl font-extrabold text-indigo-600">0%</p></div>
             </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Temperature</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="live-temp" class="text-3xl font-extrabold tracking-tight text-amber-600">--°C</p>
-                    <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">DHT11</span>
-                </div>
+            <!-- Box Temperature Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Temp</h3>
+                <div class="flex items-baseline justify-between mt-3"><p id="live-temp" class="text-3xl font-extrabold text-orange-500">--°C</p></div>
             </div>
+            <!-- Box Humidity Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Humid</h3>
+                <div class="flex items-baseline justify-between mt-3"><p id="live-humidity" class="text-3xl font-extrabold text-cyan-600">--%</p></div>
+            </div>
+        </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between sm:col-span-2 lg:col-span-1">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Box Humidity</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                    <p id="live-humidity" class="text-3xl font-extrabold tracking-tight text-cyan-600">--%</p>
-                    <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded">DHT11</span>
+        <!-- DYNAMIC ALARM SCHEDULES -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">⏰ Live Alarm Schedule Times</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase">☀️ Morning</p>
+                    <p id="schedule-morning" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase">🌤️ Afternoon</p>
+                    <p id="schedule-afternoon" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase">🌆 Evening</p>
+                    <p id="schedule-evening" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
+                </div>
+                <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase">🌙 Night</p>
+                    <p id="schedule-night" class="text-xl font-bold text-indigo-600 mt-1">--:--</p>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-2">
-                <h3 class="text-md font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <span>📅</span> Daily Session Breakdown <span class="text-xs font-normal text-slate-400">(Last 7 Days Data)</span>
-                </h3>
-                <div class="relative h-72">
-                    <canvas id="dailyChart"></canvas>
-                </div>
+        <!-- CHARTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                <h3 class="text-md font-bold text-slate-800 mb-6">📅 Daily Session Breakdown (Last 7 Days)</h3>
+                <div class="relative h-64"><canvas id="dailyChart"></canvas></div>
             </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-                <h3 class="text-md font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <span>📊</span> Session-wise Missed Alerts
-                </h3>
-                <div class="relative h-72 flex justify-center">
-                    <canvas id="sessionChart"></canvas>
-                </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="text-md font-bold text-slate-800 mb-6">📊 Session-wise Missed Alerts</h3>
+                <div class="relative h-64 flex justify-center"><canvas id="sessionChart"></canvas></div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-                <h3 class="text-md font-bold text-slate-800">📋 Recent Medicine Logs</h3>
-                <span class="text-xs text-slate-400 font-mono">*Live synced table</span>
-            </div>
+        <!-- RECENT LOGS TABLE -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50"><h3 class="text-md font-bold text-slate-800">📋 Recent Medicine Logs</h3></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                            <th class="p-4 pl-6">Date</th>
-                            <th class="p-4">Session</th>
-                            <th class="p-4">Status</th>
-                            <th class="p-4">IR Drop Verified</th>
-                            <th class="p-4">Temp @ Alarm</th>
-                            <th class="p-4 pr-6">Pills Left</th>
+                            <th class="p-4 pl-6">Date</th><th class="p-4">Session</th><th class="p-4">Status</th><th class="p-4">IR Drop Verified</th><th class="p-4">Temp @ Alarm</th><th class="p-4 pr-6">Pills Left</th>
                         </tr>
                     </thead>
-                    <tbody id="log-table-body" class="divide-y divide-slate-100 text-sm text-slate-600">
-                        </tbody>
+                    <tbody id="log-table-body" class="divide-y divide-slate-100 text-sm text-slate-600"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // === FIREBASE INITIALIZATION ===
-        const firebaseConfig = {
-            databaseURL: "https://medicine-box-c12c5-default-rtdb.firebaseio.com/"
-        };
-        
+        const firebaseConfig = { databaseURL: "https://medicine-box-c12c5-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let dailyChart, sessionChart;
-        let currentFirebaseRef = null;
+        let logRef = null, statusRef = null;
 
-        // ফাংশন: নির্দিষ্ট Box ID এর ডাটা লিসেন করা
         function initDashboardSync(boxId) {
-            if (currentFirebaseRef) {
-                currentFirebaseRef.off(); // আগের লিসেনার বন্ধ করা হলো
-            }
+            if (logRef) logRef.off();
+            if (statusRef) statusRef.off();
 
-            // ফায়ারবেস পাথ: /logs/box_01, /logs/box_02 ইত্যাদি
-            currentFirebaseRef = database.ref('logs/' + boxId);
-
-            currentFirebaseRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    clearDashboardData();
-                    return;
+            // ১. লাইভ স্ট্যাটাস এবং অ্যালার্মের সময় সিঙ্ক
+            statusRef = database.ref('status/' + boxId);
+            statusRef.on('value', (snapshot) => {
+                const sData = snapshot.val();
+                if(sData) {
+                    document.getElementById('live-pills-left').innerText = sData.pills_left !== undefined ? sData.pills_left : '--';
+                    document.getElementById('live-temp').innerText = sData.temperature ? sData.temperature.toFixed(1) + '°C' : '--°C';
+                    document.getElementById('live-humidity').innerText = sData.humidity ? sData.humidity.toFixed(0) + '%' : '--%';
+                    
+                    if(sData.schedules) {
+                        document.getElementById('schedule-morning').innerText = sData.schedules.morning || '--:--';
+                        document.getElementById('schedule-afternoon').innerText = sData.schedules.afternoon || '--:--';
+                        document.getElementById('schedule-evening').innerText = sData.schedules.evening || '--:--';
+                        document.getElementById('schedule-night').innerText = sData.schedules.night || '--:--';
+                    }
                 }
-                updateDashboardUI(data);
+            });
+
+            // ২. হিস্টোরি এবং টেবিল লগ সিঙ্ক
+            logRef = database.ref('logs/' + boxId);
+            logRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) { clearLogUI(); return; }
+                updateLogUI(data);
             });
         }
 
-        // কোনো বক্স ফায়ারবেজে খালি থাকলে ড্যাশবোর্ড রিসেট করার ফাংশন
-        function clearDashboardData() {
+        function clearLogUI() {
             document.getElementById('total-taken').innerText = '0';
             document.getElementById('total-missed').innerText = '0';
             document.getElementById('adherence-rate').innerText = '0%';
-            document.getElementById('live-temp').innerText = '--°C';
-            document.getElementById('live-humidity').innerText = '--%';
-            document.getElementById('log-table-body').innerHTML = `
-                <tr>
-                    <td colspan="6" class="p-6 text-center text-slate-400">No telemetry data available for this Box ID.</td>
-                </tr>`;
+            document.getElementById('log-table-body').innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No logs generated yet.</td></tr>`;
             if (dailyChart) dailyChart.destroy();
             if (sessionChart) sessionChart.destroy();
         }
 
-        // ফায়ারবেস ডাটা প্রসেস এবং ইউআই আপডেট ফাংশন
-        function updateDashboardUI(logsData) {
-            let totalTaken = 0;
-            let totalMissed = 0;
-            
-            let dailyLabels = [];
-            let dailyTakenData = [];
-            let dailyMissedData = [];
-            let lastKnownTemp = "--";
-            let lastKnownHum = "--";
-
+        function updateLogUI(logsData) {
+            let totalTaken = 0, totalMissed = 0;
+            let dailyLabels = [], dailyTakenData = [], dailyMissedData = [];
             let sessionMissedCount = { "Morning": 0, "Afternoon": 0, "Evening": 0, "Night": 0 };
             
             const tableBody = document.getElementById('log-table-body');
             tableBody.innerHTML = ''; 
 
-            // তারিখ ক্রমানুসারে সাজানো (সর্বশেষ ডাটা উপরে থাকবে)
             const dates = Object.keys(logsData).sort().reverse();
-            const chartDates = [...dates].reverse().slice(-7); // চার্টের জন্য ৭ দিন
+            const chartDates = [...dates].reverse().slice(-7);
 
-            dates.forEach(date => {
+            dates.forEach((date) => {
                 const sessions = logsData[date];
                 for (const session in sessions) {
                     const log = sessions[session];
-                    const status = log.status;
-                    const pillsLeft = log.pills_left;
-                    const tempAtAlarm = log.temp_at_time ? log.temp_at_time.toFixed(1) + '°C' : 'N/A';
-                    const irDetected = log.ir_detected; 
+                    if (log.status === "Taken") totalTaken++;
+                    if (log.status === "Missed") { totalMissed++; sessionMissedCount[session]++; }
 
-                    // লাইভ ইনডিকেটরের জন্য সর্বশেষ ডাটা রিড করা
-                    if(log.temp_at_time) lastKnownTemp = log.temp_at_time.toFixed(1);
-                    if(log.humidity_at_time) lastKnownHum = log.humidity_at_time.toFixed(0);
+                    const statusClass = log.status === "Taken" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-rose-700 bg-rose-50 border-rose-200";
+                    const irBadge = log.ir_detected ? `<span class="text-emerald-600 font-medium">🟢 Drop Verified</span>` : `<span class="text-slate-400">⚪ No Drop</span>`;
 
-                    if (status === "Taken") totalTaken++;
-                    if (status === "Missed") {
-                        totalMissed++;
-                        if(sessionMissedCount[session] !== undefined) sessionMissedCount[session]++;
-                    }
-
-                    // স্ট্যাটাস ও আইআর ব্যাজ স্টাইলিং
-                    const statusClass = status === "Taken" 
-                        ? "text-emerald-700 bg-emerald-50 border-emerald-200" 
-                        : "text-rose-700 bg-rose-50 border-rose-200";
-
-                    const irBadge = irDetected 
-                        ? `<span class="text-emerald-600 font-medium flex items-center gap-1">🟢 Drop Verified</span>`
-                        : `<span class="text-slate-400 flex items-center gap-1">⚪ No Drop</span>`;
-
-                    // টেবিল রো জেনারেট করা
-                    const row = `
-                        <tr class="hover:bg-slate-50/80 transition-colors duration-150">
-                            <td class="p-4 pl-6 font-semibold text-slate-700">${date}</td>
-                            <td class="p-4"><span class="text-indigo-600 font-semibold">${session}</span></td>
-                            <td class="p-4"><span class="px-2.5 py-1 rounded-md border text-xs font-bold ${statusClass}">${status}</span></td>
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="p-4 pl-6 font-semibold">${date}</td>
+                            <td class="p-4 text-indigo-600 font-semibold">${session}</td>
+                            <td class="p-4"><span class="px-2.5 py-1 rounded-md border text-xs font-bold ${statusClass}">${log.status}</span></td>
                             <td class="p-4">${irBadge}</td>
-                            <td class="p-4 text-slate-600 font-medium">${tempAtAlarm}</td>
-                            <td class="p-4 pr-6 text-slate-500 font-mono">${pillsLeft} pcs</td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
+                            <td class="p-4 font-medium">${log.temp_at_time ? log.temp_at_time.toFixed(1) + '°C' : 'N/A'}</td>
+                            <td class="p-4 pr-6 font-mono">${log.pills_left} pcs</td>
+                        </tr>`;
                 }
             });
-
-            // টপ কার্ড ভ্যালু আপডেট
-            document.getElementById('live-temp').innerText = lastKnownTemp !== "--" ? lastKnownTemp + "°C" : "--°C";
-            document.getElementById('live-humidity').innerText = lastKnownHum !== "--" ? lastKnownHum + "%" : "54%"; // ৫৪% ডিফল্ট ফলব্যাক
 
             document.getElementById('total-taken').innerText = totalTaken;
             document.getElementById('total-missed').innerText = totalMissed;
-            const rate = totalTaken + totalMissed > 0 ? Math.round((totalTaken / (totalTaken + totalMissed)) * 100) : 0;
-            document.getElementById('adherence-rate').innerText = rate + "%";
+            document.getElementById('adherence-rate').innerText = (totalTaken + totalMissed > 0 ? Math.round((totalTaken / (totalTaken + totalMissed)) * 100) : 0) + "%";
 
-            // চার্ট ১: ডেইলি স্ট্যাকড বার চার্ট
+            // Chart Generating Logic
             chartDates.forEach(date => {
                 dailyLabels.push(date);
-                let tCount = 0;
-                let mCount = 0;
-                for (const session in logsData[date]) {
-                    if (logsData[date][session].status === "Taken") tCount++;
-                    if (logsData[date][session].status === "Missed") mCount++;
+                let t = 0, m = 0;
+                for (const s in logsData[date]) {
+                    if (logsData[date][s].status === "Taken") t++;
+                    if (logsData[date][s].status === "Missed") m++;
                 }
-                dailyTakenData.push(tCount);
-                dailyMissedData.push(mCount);
+                dailyTakenData.push(t); dailyMissedData.push(m);
             });
 
             if (dailyChart) dailyChart.destroy();
-            const ctxDaily = document.getElementById('dailyChart').getContext('2d');
-            dailyChart = new Chart(ctxDaily, {
-                type: 'bar',
-                data: {
-                    labels: dailyLabels,
-                    datasets: [
-                        { label: 'Taken', data: dailyTakenData, backgroundColor: '#10b981', borderRadius: 4 },
-                        { label: 'Missed', data: dailyMissedData, backgroundColor: '#f43f5e', borderRadius: 4 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true, grid: { display: false }, ticks: { color: '#64748b', font: { weight: '500' } } },
-                        y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0, color: '#64748b' } }
-                    },
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { color: '#334155', boxWidth: 12, usePointStyle: true, font: { weight: '500' } } } 
-                    }
-                }
+            dailyChart = new Chart(document.getElementById('dailyChart'), {
+                type: 'bar', data: { labels: dailyLabels, datasets: [{ label: 'Taken', data: dailyTakenData, backgroundColor: '#10b981' }, { label: 'Missed', data: dailyMissedData, backgroundColor: '#f43f5e' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, precision: 0 } } }
             });
 
-            // চার্ট ২: সেশন-ওয়াইজ ডোনাট চার্ট
             if (sessionChart) sessionChart.destroy();
-            const ctxSession = document.getElementById('sessionChart').getContext('2d');
-            sessionChart = new Chart(ctxSession, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(sessionMissedCount),
-                    datasets: [{
-                        data: Object.values(sessionMissedCount),
-                        backgroundColor: ['#f59e0b', '#f97316', '#8b5cf6', '#3b82f6'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#334155', boxWidth: 12, usePointStyle: true, font: { weight: '500' } } }
-                    }
-                }
+            sessionChart = new Chart(document.getElementById('sessionChart'), {
+                type: 'doughnut', data: { labels: Object.keys(sessionMissedCount), datasets: [{ data: Object.values(sessionMissedCount), backgroundColor: ['#f59e0b', '#f97316', '#8b5cf6', '#3b82f6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%' }
             });
         }
 
-        // ড্রপডাউন পরিবর্তন ইন্টারঅ্যাকশন হ্যান্ডলার
-        document.getElementById('device-select').addEventListener('change', (e) => {
-            initDashboardSync(e.target.value);
-        });
-
-        // প্রথমবার পেজ লোড হওয়ার সময় ডিফল্ট সিলেক্টেড বক্স রান হবে
+        document.getElementById('device-select').addEventListener('change', (e) => initDashboardSync(e.target.value));
         initDashboardSync(document.getElementById('device-select').value);
     </script>
 </body>
